@@ -1,13 +1,13 @@
 (function() {
 
-  var EditingEntryView = {};
+  const EditingEntryView = {}
 
-  /* Renders a view to allow the user to edit an entry. Requires the $entry
+  /* Renders a view to allow the user to edit an entry. Requires the entryElement
    * element and an object representing the active entry. */
-  EditingEntryView.render = function($entry, activeEntryData) {
+  EditingEntryView.render = (entryElement, activeEntryData) => {
     // TODO
-  };
+  }
 
-  window.EditingEntryView = EditingEntryView;
+  window.EditingEntryView = EditingEntryView
 
-})();
+})()

@@ -1,13 +1,13 @@
 (function() {
 
-  var MainView = {};
+  const MainView = {}
 
   /* Renders the main area, showing entries. */
-  MainView.render = function($body) {
-    var $entry = $body.find('#entry');
-    EntryView.render($entry, null);
-  };
+  MainView.render = body => {
+    const entry = body.querySelector('#entry')
+    EntryView.render(entry, null)
+  }
 
-  window.MainView = MainView;
+  window.MainView = MainView
 
-})();
+})()

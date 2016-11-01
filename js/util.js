@@ -1,9 +1,9 @@
 (function() {
 
-  var Util = {};
+  const Util = {}
 
   // TODO for any common code across files
 
-  window.Util = Util;
+  window.Util = Util
 
-})();
+})()

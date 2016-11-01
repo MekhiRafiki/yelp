@@ -1,6 +1,6 @@
 (function() {
 
-  var Templates = {};
+  const Templates = {}
 
   /* Creates an HTMLElement to display an entry in editing, creating, or
    * viewing mode.
@@ -19,14 +19,14 @@
    *
    * Only one of viewing, editing, and creating should be true.
    */
-  Templates.renderEntry = function(options) {
-    var activeEntryData = options.activeEntryData;
+  Templates.renderEntry = options => {
+    const activeEntryData = options.activeEntryData
 
-    var name = '';
-    var address = '';
-    var description = '';
-    var actions = [];
-    var dropdown = '';
+    let name = ''
+    let address = ''
+    let description = ''
+    let actions = []
+    let dropdown = ''
 
     if (options.editing) {
       // able to update name, address, and description
@@ -34,59 +34,57 @@
         type: 'text',
         name: 'name',
         value: activeEntryData.name
-      }, []);
+      }, [])
       address = tag('input', {
         type: 'text',
         name: 'address',
         value: activeEntryData.address
-      }, []);
+      }, [])
 
       description = tag('textarea', {name: 'description'},
-                        activeEntryData.description);
-      actions = [tag('button', {class: 'teal update'}, 'Update')];
+                        activeEntryData.description)
+      actions = [tag('button', {class: 'teal update'}, 'Update')]
     } else if (options.creating) {
       // able to set name, address, and description
       name = tag('input', {
         type: 'text',
         name: 'name'
-      }, []);
+      }, [])
       address = tag('input', {
         type: 'text',
         name: 'address'
-      }, []);
+      }, [])
 
-      description = tag('textarea', {name: 'description'}, []);
-      actions = [
-        tag('button', {class: 'green add'}, 'Add')
-      ];
+      description = tag('textarea', {name: 'description'}, [])
+      actions = [tag('button', {class: 'green add'}, 'Add')]
     } else if (options.viewing) {
       // no editing, but three call to action buttons
-      name = tag('span', {}, activeEntryData.name);
-      address = tag('span', {}, activeEntryData.address);
+      name = tag('span', {}, activeEntryData.name)
+      address = tag('span', {}, activeEntryData.address)
 
-      description = tag('span', {}, activeEntryData.description);
+      description = tag('span', {}, activeEntryData.description)
       actions = [
         tag('button', {class: 'green new'}, 'New'),
         ' ',
         tag('button', {class: 'teal edit'}, 'Edit'),
         ' ',
         tag('button', {class: 'red delete'}, 'Delete')
-      ];
+      ]
 
       // dropdown with options for each entry
-      var options = options.entries.map(function(entry) {
-        return tag('option', {value: entry.id}, entry.name);
-      });
-      options.unshift(tag('option', {value: '-1'}, 'Pick location...'));
+      options = options.entries.map(entry => {
+        return tag('option', {value: entry.id}, entry.name)
+      })
+      options.unshift(tag('option', {value: '-1'}, 'Pick location...'))
 
       dropdown = tag('div', {class: 'dropdown'}, [
         tag('button', {}, ''),
         tag('select', {}, options)
-      ]);
+      ])
     }
 
     // for displaying server errors
-    actions.push(tag('div', {class: 'error'}, []));
+    actions.push(tag('div', {class: 'error'}, []))
 
     return tag('div', {}, [
       tag('div', {class: 'map'}, []),
@@ -114,8 +112,8 @@
           description
         ])
       ])
-    ]);
-  };
+    ])
+  }
 
   /* Creates and returns an HTMLElement representing a tag of the given name.
    * attrs is an object, where the key-value pairs represent HTML attributes to
@@ -140,29 +138,29 @@
    *    </div>
    */
   function tag(name, attrs, contents) {
-    var element = document.createElement(name);
-    for (var attr in attrs) {
-      element.setAttribute(attr, attrs[attr]);
+    const element = document.createElement(name)
+    for (const attrName in attrs) {
+      element.setAttribute(attrName, attrs[attrName])
     }
 
     // If contents is a single string or HTMLElement, make it an array of one
     // element; this guarantees that contents is an array below.
     if (!(contents instanceof Array)) {
-      contents = [contents];
+      contents = [contents]
     }
 
-    contents.forEach(function(piece) {
+    contents.forEach(piece => {
       if (piece instanceof HTMLElement) {
-        element.appendChild(piece);
+        element.appendChild(piece)
       } else {
         // must create a text node for a raw string
-        element.appendChild(document.createTextNode(piece));
+        element.appendChild(document.createTextNode(piece))
       }
-    });
+    })
 
-    return element;
+    return element
   }
 
-  window.Templates = Templates;
+  window.Templates = Templates
 
-})();
+})()
