@@ -18,21 +18,35 @@ class ExtendedHTTPHandler(SimpleHTTPRequestHandler):
   PUT_PATH_REGEX = re.compile(r'/entries/([^/]+)$')
   DELETE_PATH_REGEX = re.compile(r'/entries/([^/]+)/delete$')
 
+  STATUS_OK = 200
+  STATUS_USER_ERROR = 422
+
+  TYPE_PLAIN = 'text/plain'
+  TYPE_JSON = 'application/json'
+
   def __init__(self, *args, **kwargs):
     """
     Creates an ExtendedHTTPHandler that serves entries.
     """
     SimpleHTTPRequestHandler.__init__(self, *args, **kwargs)
 
+  def respond(self, status_code, content_type, body):
+    """
+    Sets the status code and content-type based on the given parameters. Sends
+    the given body to the client, adding an appropriate content-length header.
+    """
+    self.send_response(status_code)
+    self.send_header('Content-type', content_type)
+    self.send_header('Content-length', len(body))
+    self.end_headers()
+    self.wfile.write(body)
+
   def do_GET(self):
     """
     Handles GET requests.
     """
     if self.path == '/entries':
-      self.send_response(200)
-      self.send_header('Content-type', 'application/json')
-      self.end_headers()
-      self.wfile.write(json.dumps(entries))
+      self.respond(self.STATUS_OK, self.TYPE_JSON, json.dumps(entries))
     else:
       # let SimpleHTTPRequestHandler serve static files
       return SimpleHTTPRequestHandler.do_GET(self)
@@ -59,12 +73,8 @@ class ExtendedHTTPHandler(SimpleHTTPRequestHandler):
         not isinstance(address, basestring) or
         not isinstance(description, basestring) or
         name == '' or address == '' or description == ''):
-      self.send_response(422)
-      self.send_header('Content-type', 'text/plain')
-      self.end_headers()
-
-      error = 'Must provide a valid name, address, and description.'
-      self.wfile.write(error)
+      self.respond(self.STATUS_USER_ERROR, self.TYPE_PLAIN,
+        'Must provide a valid name, address, and description.')
       return False
 
     return True
@@ -76,12 +86,8 @@ class ExtendedHTTPHandler(SimpleHTTPRequestHandler):
     # id must correspond to an entry
     if (not isinstance(entry_id, basestring) or
         self.entry_index_by_id(entry_id) is None):
-      self.send_response(422)
-      self.send_header('Content-type', 'text/plain')
-      self.end_headers()
-
-      error = 'Must provide a valid string id that refers to an entry.'
-      self.wfile.write(error)
+      self.respond(self.STATUS_USER_ERROR, self.TYPE_PLAIN,
+        'Must provide a valid string id that refers to an entry.')
       return False
 
     return True
@@ -103,12 +109,8 @@ class ExtendedHTTPHandler(SimpleHTTPRequestHandler):
         try:
           data = json.loads(self.rfile.read(length))
         except ValueError:
-          self.send_response(422)
-          self.send_header('Content-type', 'text/plain')
-          self.end_headers()
-
-          error = 'Must provide a valid JSON body.'
-          self.wfile.write(error)
+          self.respond(self.STATUS_USER_ERROR, self.TYPE_PLAIN,
+            'Must provide a valid JSON body.')
           return
 
         # must validate all entry fields
@@ -124,9 +126,6 @@ class ExtendedHTTPHandler(SimpleHTTPRequestHandler):
         valid = valid and self.validate_entry_id(entry_id)
 
       if valid:
-        self.send_response(200)
-        self.end_headers()
-
         # perform appropriate action
         if is_post:
           entry = {
@@ -137,7 +136,7 @@ class ExtendedHTTPHandler(SimpleHTTPRequestHandler):
           }
 
           entries.append(entry)
-          self.wfile.write(json.dumps(entry))
+          self.respond(self.STATUS_OK, self.TYPE_JSON, json.dumps(entry))
         elif is_put:
           entry = {
             'id': entry_id,
@@ -148,13 +147,13 @@ class ExtendedHTTPHandler(SimpleHTTPRequestHandler):
 
           index = self.entry_index_by_id(entry_id)
           entries[index] = entry
-          self.wfile.write(json.dumps(entry))
+          self.respond(self.STATUS_OK, self.TYPE_JSON, json.dumps(entry))
         else:  # delete path
           index = self.entry_index_by_id(entry_id)
           entries.pop(index)
 
           success = {'success': True}
-          self.wfile.write(json.dumps(success))
+          self.respond(self.STATUS_OK, self.TYPE_JSON, json.dumps(success))
     else:
       return SimpleHTTPRequestHandler.do_POST(self)
 
